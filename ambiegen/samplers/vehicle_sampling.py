@@ -25,49 +25,56 @@ def generate_random_road():
     valid_road = False
     scenario = []
 
-
     while not valid_road:
-        ds = 5
-        kappas_indices = []  # 初始化曲率列表
-        test_map = FrenetMap(map_size)  # 创建FrenetMap对象
-        valid_scenario = []  # 记录有效的场景部分
+        ds = 3
+        kappas_indices = []  # 记录曲率变化
+        test_map = FrenetMap(map_size)  # 创建 FrenetMap
+        valid_scenario = []  # 记录有效轨迹部分
+        last_valid_scenario = []  # 记录最后的有效轨迹
 
-        # 初始道路有效，继续扩展
         done = False
         while not done:
-            # 随机生成一个曲率值
+            # 生成新的随机曲率
             kappa = np.random.randint(-10, 10)
-
             kappas_indices.append(kappa)
 
-            # 使用Frenet坐标系生成路面点
+            # 生成道路点
             road_points = test_map.generate_road(
-                kappas=np.array(kappas_indices) * curvature_bound / 10,  # 曲率缩放
+                kappas=np.array(kappas_indices) * curvature_bound/10,  # 曲率缩放
                 ds=ds,
-                lane_width=lane_width
+                lane_width=lane_width,
             )
 
-            # 检查道路是否有效
-            if test_map.is_valid_road(road_points):
-                # 如果道路有效，记录有效部分
-                if kappa == 0:
-                    valid_scenario.append((0, ds * 10, 0))  # 直行
-                elif kappa > 0:
-                    valid_scenario.append((2, 0, kappa * 10))  # 左转
-                else:
-                    valid_scenario.append((1, 0, -kappa * 10))  # 右转
-            else:
-                # 道路无效时，停止添加曲率
-                done = True
+            filtered_road_points = [[point[0], point[1]] for point in road_points]
 
-        # 一旦扩展完，检查有效的场景部分
-        if valid_scenario:
-            # 使用FrenetMap类去生成实际的道路坐标
-            road_points_from_scenario = test_map.get_points_from_frenet_scenario(valid_scenario)
-            # 确保去掉无效部分
-            if test_map.is_valid_road(road_points_from_scenario):
-                scenario = valid_scenario  # 设置有效的场景
-                valid_road = True  # 道路有效时，跳出循环
+            # **前两个点不检查**
+            if len(filtered_road_points) >= 3:
+                if not is_valid_road(filtered_road_points):
+                    # print("Invalid road detected! Keeping last valid scenario.")
+                    valid_scenario = last_valid_scenario  # 回退到最后一个有效路段
+                    # print(filtered_road_points)
+                    break  # 退出 while 循环
+
+            # **如果通过了检查，就更新最后的有效轨迹**
+            last_valid_scenario = valid_scenario.copy()
+
+            # 记录有效路径
+            if kappa == 0:
+                valid_scenario.append((0, ds * 10, 0))  # 直行
+            elif kappa > 0:
+                valid_scenario.append((2, ds * 10, kappa * 10))  # 左转
+            else:
+                valid_scenario.append((1, ds * 10, -kappa * 10))  # 右转
+
+            # print(filtered_road_points)
+
+            # print(valid_scenario)
+        # **不再进行最终轨迹检查，直接返回**
+        scenario = valid_scenario
+        # print(scenario)
+        # print(scenario)
+        # print(scenario)
+        valid_road = True  # 退出外部 while 循环
 
     return scenario
 

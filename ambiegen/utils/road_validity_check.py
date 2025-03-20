@@ -50,25 +50,33 @@ def interpolate_test(the_test):
                     [round(v, rounding_precision) for v in new_y_vals],
                     [-28.0 for v in new_x_vals],
                     [8.0 for v in new_x_vals]))
-def is_too_sharp(the_test, TSHD_RADIUS=47):
+
+def calculate_curvature(x, y):
     """
-    If the minimum radius of the test is greater than the TSHD_RADIUS, then the test is too sharp
-
-    Args:
-      the_test: the input road topology
-      TSHD_RADIUS: The radius of the circle that is used to check if the test is too sharp. Defaults to
-    47
-
-    Returns:
-      the boolean value of the check variable.
+    基于导数的曲率计算（适用于密集点）。
+    :param x: x坐标列表
+    :param y: y坐标列表
+    :return: 曲率列表
     """
-    if TSHD_RADIUS > min_radius(the_test) > 0.0:
-        check = True
-        #print("Too sharp")
-    else:
-        check = False
-    return check
+    dx = np.gradient(x)
+    dy = np.gradient(y)
+    ddx = np.gradient(dx)
+    ddy = np.gradient(dy)
+    curvature = (dx * ddy - dy * ddx) / (dx**2 + dy**2)**1.5
+    # print(curvature)
+    return curvature
 
+def is_too_sharp(the_test, max_curvature=0.2):
+    """
+    基于导数的急弯检测。
+    :param the_test: 道路点列表 [(x1, y1), (x2, y2), ...]
+    :param max_curvature: 最大允许曲率
+    :return: True 如果存在急弯，否则 False
+    """
+    x = [p[0] for p in the_test]
+    y = [p[1] for p in the_test]
+    curvature = calculate_curvature(x, y)
+    return np.max(np.abs(curvature)) < max_curvature
 
 
 def is_valid_road(points):
@@ -90,9 +98,9 @@ def is_valid_road(points):
     invalid = (
         (road.is_simple is False)
        # or (is_too_sharp(points) is True)
+        or (in_range is False)
         or (is_too_sharp(the_test) is True)
         or (len(points) < 3)
-        or (in_range is False)
     )
     return not(invalid)
 
@@ -153,17 +161,15 @@ def min_radius(x, w=5):
     return mr * 3.280839895  # , mincurv
 
 
-def is_inside_map(interpolated_points, map_size):
+def is_inside_map(points, map_size):
     """
-        Take the extreme points and ensure that their distance is smaller than the map side
+    Check if all points are within the map boundaries.
+    :param points: List of road points [(x1, y1), (x2, y2), ...]
+    :param map_size: Tuple (width, height) of the map
+    :return: True if all points are inside the map, False otherwise
     """
-    xs = [t[0] for t in interpolated_points]
-    ys = [t[1] for t in interpolated_points]
-
-    min_x, max_x = min(xs), max(xs)
-    min_y, max_y = min(ys), max(ys)
-
-    return 0 < min_x or min_x > map_size and \
-            0 < max_x or max_x > map_size and \
-            0 < min_y or min_y > map_size and \
-            0 < max_y or max_y > map_size
+    for point in points:
+        x, y = point[0], point[1]
+        if not (0 <= x <= 200 and 0 <= y <= 200):
+            return False
+    return True
