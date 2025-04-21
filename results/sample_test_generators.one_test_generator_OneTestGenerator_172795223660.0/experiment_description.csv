@@ -1,0 +1,2 @@
+time_budget,executor,map_size,module_name,class_name,dave2_model,beamng_home,beamng_user,oob_tolerance,speed_limit,module_path,visualize_tests,log_to,debug
+10,beamng,200,sample_test_generators.one_test_generator,OneTestGenerator,dave2/beamng-dave2.h5,D:\BeamNG.tech.v0.26.2.0\BeamNG.tech.v0.26.2.0,D:\BeamNG.tech.v0.26.2.0_userpath,0.95,70,,False,,False

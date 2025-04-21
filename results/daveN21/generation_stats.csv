@@ -1,0 +1,2 @@
+test_generated,test_valid,test_invalid,test_passed,test_failed,test_in_error,real_time_generation,real_time_execution,simulated_time_execution
+39,38,1,15,22,0,203.92755909999988,1528.6919349999998,613.8317782655358

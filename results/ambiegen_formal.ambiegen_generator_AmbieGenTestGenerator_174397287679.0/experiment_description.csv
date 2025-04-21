@@ -1,0 +1,2 @@
+visualize_tests,time_budget,executor,map_size,module_name,class_name,beamng_home,beamng_user,dave2_model,generation_budget,execution_budget,oob_tolerance,speed_limit,module_path,log_to,debug
+True,600,beamng,200,ambiegen_formal.ambiegen_generator,AmbieGenTestGenerator,E:\BeamNG.tech.v0.26.2.0\BeamNG.tech.v0.26.2.0,E:\BeamNG.tech.v0.26.2.0_userpath,,,,0.5,70,,,False
