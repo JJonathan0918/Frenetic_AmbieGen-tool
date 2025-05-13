@@ -67,5 +67,4 @@ python competition.py --visualize-tests --time-budget 1800 --executor beamng --m
 
 ## 📜 License
 
-This project is licensed under the MIT License.  
-See the [LICENSE](./LICENSE) file for more details.
+This project includes code from [cps-tool-competition], which is licensed under the GPL v3 License.
